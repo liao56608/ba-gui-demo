@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZenTite — Artist</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="device-frame">
+  <div class="screen bg-setting">
+    <!-- btn_back: top=25, left=30 -->
+    <a href="index.html" class="btn-back" title="Back"></a>
+    <!-- iv_memory: top=25, left=97 -->
+    <a href="memory_activity.html?src=artist" class="btn-memory-icon" title="Memory"></a>
+
+    <!-- Title: logo + "Artist" centered -->
+    <div class="title-bar">
+      <img src="img/logo_artist.png" alt="" width="55" height="56">
+      <span class="text-cyan-title">Artist</span>
+    </div>
+
+    <!-- cb_auto (auto checkbox): top-right -->
+    <div class="cb-auto2 off" id="cbAuto" style="top:33px;right:26px;"></div>
+
+    <!-- iv_tips (model image): top=250, left=45 -->
+    <div class="iv-tips-1"></div>
+
+    <!-- Parameter panel (bg_parameter_area_short): 296x613, top=165, left=423 -->
+    <div class="param-panel-short">
+      <!-- txt_pluse: top=57, width=220, centered -->
+      <div class="param-label" style="top:57px;">Pulse Duration(ms)</div>
+
+      <!-- btn_reduce2: top=79 (57+22), left=37 -->
+      <button class="stepper-btn stepper-reduce" id="pulseReduce" style="top:79px;left:37px;"></button>
+      <!-- seekBar_time "50": centered between buttons -->
+      <div class="stepper-value" id="pulseValue" style="top:79px;left:88px;">50</div>
+      <!-- btn_add2: top=79, right=37 -->
+      <button class="stepper-btn stepper-add" id="pulseAdd" style="top:79px;right:37px;"></button>
+
+      <!-- Split line at top=252 -->
+      <div class="split-line" style="top:252px;"></div>
+
+      <!-- text_power2: top=350 -->
+      <div class="param-label" style="top:350px;">Power(W)</div>
+
+      <!-- PowerSeekBar: 223x159, 15dp below power label = top=385, left aligned with btn_reduce2 (37+? ) -->
+      <div class="power-seekbar" id="powerSeekbar" style="top:385px;left:37px;">
+        <span class="value" id="powerValue">0</span>
+        <span class="unit">W</span>
+      </div>
+
+      <!-- btn_reduce1 (minus): top=480, left=37 -->
+      <button class="stepper-btn stepper-minus" id="powerReduce" style="top:480px;left:37px;"></button>
+      <!-- btn_add1 (plus): top=480, right=37 -->
+      <button class="stepper-btn stepper-plus" id="powerAdd" style="top:480px;right:37px;"></button>
+    </div>
+
+    <!-- icon_remain: top=860, left=66 -->
+    <div class="icon-remain-line" style="top:860px;left:66px;"></div>
+    <!-- text_remain: next to icon_remain -->
+    <div class="text-remain-label" style="top:855px;left:83px;">Remaining / Total</div>
+    <!-- text_count: below text_remain -->
+    <div class="text-remain-value" style="top:880px;left:83px;">0 / 0</div>
+
+    <!-- Bottom message -->
+    <div class="bottom-msg" id="bottomMsg">Please Press STANDBY Button</div>
+
+    <!-- Standby/Ready/Treat button -->
+    <button class="btn-standby" id="btnRun" style="top:870px;right:52px;">StandBy</button>
+
+    <div class="proto-hint">Demo GUI · <a href="index.html">Home</a></div>
+  </div>
+</div>
+<script src="js/fit.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Stepper wiring
+  wireStepper('pulseReduce', 'pulseAdd', 'pulseValue', 10, 1000, 10, 50);
+  wireStepper('powerReduce', 'powerAdd', 'powerValue', 0, 20, 1, 0);
+  document.getElementById('powerSeekbar')?.addEventListener('click', () => {
+    const el = document.getElementById('powerValue');
+    let v = parseInt(el.textContent) || 0;
+    v = Math.min(20, v + 2);
+    el.textContent = v;
+  });
+
+  // Auto checkbox toggle
+  document.getElementById('cbAuto')?.addEventListener('click', function() {
+    this.classList.toggle('on');
+    this.classList.toggle('off');
+  });
+
+  // Standby / Ready / Treat state machine (same pattern as microrf)
+  (function initRunButton() {
+    const btn = document.getElementById('btnRun');
+    const msg = document.getElementById('bottomMsg');
+    if (!btn) return;
+
+    let state = 0; // 0 = standby, 1 = ready, 2 = treating
+    let autoTreatTimer = null;
+
+    function setState(s) {
+      state = s;
+      btn.classList.remove('ready', 'treat');
+      clearTimeout(autoTreatTimer);
+
+      if (state === 0) {
+        btn.textContent = 'StandBy';
+        if (msg) msg.textContent = 'Please Press STANDBY Button';
+      } else if (state === 1) {
+        btn.classList.add('ready');
+        btn.textContent = 'Ready';
+        if (msg) msg.textContent = 'System ready';
+        autoTreatTimer = setTimeout(() => setState(2), 2000);
+      } else if (state === 2) {
+        btn.classList.add('treat');
+        btn.textContent = 'Treat';
+        if (msg) msg.textContent = 'System running';
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      if (state === 0) setState(1);
+      else setState(0);
+    });
+
+    setState(0);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZenTite — MicroRF</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="device-frame">
+  <div class="screen bg-setting">
+    <!-- btn_back: top=25, left=30 -->
+    <a href="index.html" class="btn-back" title="Back"></a>
+    <!-- iv_memory: top=25, left=97 -->
+    <a href="memory_activity.html?src=microrf" class="btn-memory-icon" title="Memory"></a>
+
+    <!-- Title: logo + "MicroRF" centered -->
+    <div class="title-bar">
+      <img src="img/logo_microrf.png" alt="" width="55" height="56">
+      <span class="text-cyan-title">MicroRF</span>
+    </div>
+
+    <!-- Mode switch (expert/general): top=30, right=112 -->
+    <div class="mode-switch general" id="modeSwitch" style="top:30px;right:112px;"></div>
+    <!-- Pump checkbox: top=30, right=26 -->
+    <div class="cb-pump off" id="cbPump"></div>
+
+    <!-- iv_tips (model image): top=151, left=44 -->
+    <div class="iv-tips-1" style="top:151px;left:44px;"></div>
+
+    <!-- ===== Normal mode: parameter panel ===== -->
+    <!-- bg_parameter_area: 296x696, top=130, left=423 -->
+    <div class="param-panel" id="normalPanel">
+      <!-- txt_pluse: top=31, centered -->
+     <!-- txt_pluse: top=31, centered -->
+      <div class="param-label" style="top:20px;">Pulse Duration(ms)</div>
+      <!-- btn_reduce_2: top increased to create more vertical space -->
+      <button class="stepper-btn stepper-reduce" id="pulseReduce" style="top:65px;left:37px;"></button>
+      <!-- seekBar_time "100": centered -->
+      <div class="stepper-value" id="pulseValue" style="top:65px;left:88px;color:#fff;">100</div>
+      <!-- btn_add_2: top increased -->
+      <button class="stepper-btn stepper-add" id="pulseAdd" style="top:65px;right:37px;"></button>
+
+      <!-- Split line at top=160 -->
+      <div class="split-line" style="top:160px;"></div>
+
+      <!-- txt_depth "Depth(mm)": top=190 -->
+      <div class="param-label" style="top:190px;">Depth(mm)</div>
+      <!-- seekBar_length (PowerSeekBar): 223x159, top=220 (190+15+15?), left=37 -->
+      <div class="power-seekbar" id="depthSeekbar" style="top:220px;left:37px;">
+        <span class="value" id="depthValue" style="color:#fff;">2.5</span>
+      </div>
+      <!-- btn_reduce_3: top=323, left=37 -->
+      <button class="stepper-btn stepper-reduce" id="depthReduce" style="top:323px;left:37px;"></button>
+      <!-- btn_add_3: top=323, right=37 -->
+      <button class="stepper-btn stepper-add" id="depthAdd" style="top:323px;right:37px;"></button>
+
+      <!-- Split line at top=432 -->
+      <div class="split-line" style="top:432px;"></div>
+
+      <!-- text_power2: top=457 -->
+      <div class="param-label" style="top:457px;">Power(W)</div>
+      <!-- progress_power (PowerSeekBar): 223x159, top=487 (457+15+15?) -->
+      <div class="power-seekbar" id="powerSeekbar" style="top:487px;left:37px;">
+        <span class="value" id="powerValue" style="color:#fff;">0</span>
+      </div>
+      <!-- btn_reduce_1: top=589, left=37 -->
+      <button class="stepper-btn stepper-minus" id="powerReduce" style="top:589px;left:37px;"></button>
+      <!-- btn_add_1: top=589, right=37 -->
+      <button class="stepper-btn stepper-plus" id="powerAdd" style="top:589px;right:37px;"></button>
+    </div>
+
+    <!-- ===== Expert mode: multi-layer table (hidden) ===== -->
+    <div class="expert-table hidden" id="expertPanel">
+      <div class="header-row">
+        <span>On/Off</span>
+        <span>Depth</span>
+        <span>Power</span>
+        <span>Time</span>
+      </div>
+      <div class="unit-row">
+        <span></span>
+        <span>(mm)</span>
+        <span>(W)</span>
+        <span>(ms)</span>
+      </div>
+      <!-- 5 layers (lev4 to lev0, top to bottom) -->
+      <div class="layer-row" data-layer="0"><button class="onoff on" id="onoff0"></button><div class="val" id="depth0" data-field="depth">0.7</div><div class="val" id="pwr0" data-field="power">8</div><div class="val" id="time0" data-field="time">100</div></div>
+      <div class="layer-row" data-layer="1"><button class="onoff on" id="onoff1"></button><div class="val" id="depth1" data-field="depth">1.0</div><div class="val" id="pwr1" data-field="power">2</div><div class="val" id="time1" data-field="time">20</div></div>
+      <div class="layer-row" data-layer="2"><button class="onoff on" id="onoff2"></button><div class="val" id="depth2" data-field="depth">1.0</div><div class="val" id="pwr2" data-field="power">2</div><div class="val" id="time2" data-field="time">20</div></div>
+      <div class="layer-row" data-layer="3"><button class="onoff on" id="onoff3"></button><div class="val" id="depth3" data-field="depth">1.0</div><div class="val" id="pwr3" data-field="power">2</div><div class="val" id="time3" data-field="time">20</div></div>
+      <div class="layer-row" data-layer="4"><button class="onoff on" id="onoff4"></button><div class="val" id="depth4" data-field="depth">1.0</div><div class="val" id="pwr4" data-field="power">8</div><div class="val" id="time4" data-field="time">100</div></div>
+      <div class="layer-footer">
+        <span class="layer-label">Layer</span>
+        <div class="layer-val" id="layerIndex">4 / 5</div>
+        <div class="layer-adjust">
+          <button class="stepper-reduce" id="layerPrev" style="background-image:url('img/btn_left_normal.png');"></button>
+          <button class="stepper-add" id="layerNext" style="background-image:url('img/btn_right_normal.png');"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expert mode: depth section (right side, hidden) -->
+    <div class="depth-section hidden" id="depthSection">
+      <div class="depth-label">Depth(mm)</div>
+      <div class="depth-control">
+        <div class="depth-seekbar" id="expertDepthSeekbar"><span class="value" id="expertDepthValue">0.7</span></div>
+        <div class="depth-steppers">
+          <button class="stepper-btn stepper-minus" id="expertDepthReduce"></button>
+          <button class="stepper-btn stepper-plus" id="expertDepthAdd" style="left:176px;"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Interval section (bottom-left) ===== -->
+    <div class="interval-section">
+      <div class="icon-interval-line" style="position:absolute;top:0;left:0;"></div>
+      <div class="interval-label">Interval(s)</div>
+      <div class="cb-auto off" id="cbIntervalAuto" style="top:-5px;left:225px;"></div>
+      <button class="stepper-btn stepper-reduce interval-reduce" id="intervalReduce" style="top:55px;left:0;width:40px;height:40px;background-size:contain;"></button>
+      <div class="interval-value" id="intervalValue" style="top:55px;left:81px;color:#fff;">0.5</div>
+      <button class="stepper-btn stepper-add interval-add" id="intervalAdd" style="top:55px;left:257px;width:40px;height:40px;background-size:contain;"></button>
+    </div>
+
+    <!-- ===== Remain/Total ===== -->
+    <div class="icon-remain-line" style="top:862px;left:66px;"></div>
+    <div class="text-remain-label" style="top:857px;left:83px;">Remaining / Total</div>
+    <div class="text-remain-value" style="top:882px;left:83px;">0 / 0</div>
+
+    <!-- ===== Bottom message ===== -->
+    <div class="bottom-msg" id="bottomMsg">Please Press STANDBY Button</div>
+
+    <!-- ===== Standby / Ready / Treat button ===== -->
+    <button class="btn-standby" id="btnRun" style="top:870px;right:52px;">STANDBY</button>
+
+    <!-- ===== Pump setting dialog (inline, hidden) ===== -->
+    <div class="pump-dialog-overlay hidden" id="pumpOverlay">
+      <div class="pump-dialog">
+        <div class="pump-title">Vacuum Level</div>
+        <button class="pump-close" id="pumpClose"></button>
+        <div class="pump-levels">
+          <button class="pump-level-btn active" data-level="low">Low</button>
+          <button class="pump-level-btn" data-level="med">Medium</button>
+          <button class="pump-level-btn" data-level="high">High</button>
+        </div>
+        <div class="pump-buttons">
+          <button id="pumpEdit">Edit</button>
+          <button id="pumpConfirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Pump edit dialog (hidden) ===== -->
+    <div class="pump-dialog-overlay hidden" id="pumpEditOverlay">
+      <div class="pump-edit-dialog">
+        <button class="pump-edit-close" id="pumpEditClose"></button>
+        <div class="pump-val-row selected" data-level="low" id="pumpRowLow">
+          <span class="lbl">Low</span>
+          <button class="dec-btn" data-level="low" data-d="-5"></button>
+          <span class="val" id="pumpValLow">50</span>
+          <span class="unit">mmHg</span>
+          <button class="add-btn" data-level="low" data-d="5"></button>
+        </div>
+        <div class="pump-val-row" data-level="med" id="pumpRowMed">
+          <span class="lbl">Medium</span>
+          <button class="dec-btn" data-level="med" data-d="-5"></button>
+          <span class="val" id="pumpValMed">75</span>
+          <span class="unit">mmHg</span>
+          <button class="add-btn" data-level="med" data-d="5"></button>
+        </div>
+        <div class="pump-val-row" data-level="high" id="pumpRowHigh">
+          <span class="lbl">High</span>
+          <button class="dec-btn" data-level="high" data-d="-5"></button>
+          <span class="val" id="pumpValHigh">90</span>
+          <span class="unit">mmHg</span>
+          <button class="add-btn" data-level="high" data-d="5"></button>
+        </div>
+        <div class="pump-edit-buttons">
+          <button id="pumpReset">Reset</button>
+          <button id="pumpModeConfirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="proto-hint">Demo GUI · <a href="index.html">Home</a></div>
+  </div>
+</div>
+<script src="js/fit.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Steppers
+  wireStepper('pulseReduce', 'pulseAdd', 'pulseValue', 10, 240, 5, 100);
+  wireStepper('depthReduce', 'depthAdd', 'depthValue', 0.5, 3.5, 0.1, 2.5, 1);
+  wireStepper('powerReduce', 'powerAdd', 'powerValue', 0, 12, 1, 0);
+
+  // Interval: cycles through preset values [0.5, 0.8, 1.0, 2.0, 2.5]
+  (function initIntervalStepper() {
+    const presets = [0.5, 0.8, 1.0, 2.0, 2.5];
+    const el = document.getElementById('intervalValue');
+    if (!el) return;
+    let idx = 0; // default 0.5
+    function upd() { el.textContent = presets[idx].toFixed(1); }
+    document.getElementById('intervalReduce')?.addEventListener('click', () => {
+      idx = Math.max(0, idx - 1);
+      upd();
+    });
+    document.getElementById('intervalAdd')?.addEventListener('click', () => {
+      idx = Math.min(presets.length - 1, idx + 1);
+      upd();
+    });
+    upd();
+  })();
+
+  // Power seekbar click
+  document.getElementById('powerSeekbar')?.addEventListener('click', () => {
+    const el = document.getElementById('powerValue');
+    let v = parseInt(el.textContent) || 0;
+    v = Math.min(12, v + 2);
+    el.textContent = v;
+  });
+  document.getElementById('depthSeekbar')?.addEventListener('click', () => {
+    const el = document.getElementById('depthValue');
+    let v = parseFloat(el.textContent) || 0.5;
+    v = Math.min(3.5, Math.round((v + 0.1) * 10) / 10);
+    el.textContent = v.toFixed(1);
+  });
+
+  // Mode switch (expert/general)
+  document.getElementById('modeSwitch')?.addEventListener('click', function() {
+    this.classList.toggle('expert');
+    this.classList.toggle('general');
+    const isExpert = this.classList.contains('expert');
+    document.getElementById('normalPanel').classList.toggle('hidden', isExpert);
+    document.getElementById('expertPanel').classList.toggle('hidden', !isExpert);
+    document.getElementById('depthSection').classList.toggle('hidden', !isExpert);
+  });
+
+  // Pump checkbox
+  document.getElementById('cbPump')?.addEventListener('click', function() {
+    this.classList.toggle('on');
+    this.classList.toggle('off');
+    if (this.classList.contains('on')) {
+      document.getElementById('pumpOverlay').classList.remove('hidden');
+    }
+  });
+
+  // Pump dialog
+  document.getElementById('pumpClose')?.addEventListener('click', () => {
+    document.getElementById('pumpOverlay').classList.add('hidden');
+  });
+  document.querySelectorAll('.pump-level-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.pump-level-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+  document.getElementById('pumpEdit')?.addEventListener('click', () => {
+    document.getElementById('pumpEditOverlay').classList.remove('hidden');
+  });
+  document.getElementById('pumpEditClose')?.addEventListener('click', () => {
+    document.getElementById('pumpEditOverlay').classList.add('hidden');
+  });
+  document.getElementById('pumpConfirm')?.addEventListener('click', () => {
+    document.getElementById('pumpOverlay').classList.add('hidden');
+    showToast('Pump level saved');
+  });
+  document.getElementById('pumpModeConfirm')?.addEventListener('click', () => {
+    document.getElementById('pumpEditOverlay').classList.add('hidden');
+    showToast('Pump values saved');
+  });
+  document.getElementById('pumpReset')?.addEventListener('click', () => {
+    document.getElementById('pumpValLow').textContent = '50';
+    document.getElementById('pumpValMed').textContent = '75';
+    document.getElementById('pumpValHigh').textContent = '90';
+    showToast('Pump values reset to default');
+  });
+
+  // Pump edit dialog: single selectable row adjusted by left/right arrows
+  (function initPumpEdit() {
+    const rows = document.querySelectorAll('#pumpEditOverlay .pump-val-row');
+    const vals = {
+      low: document.getElementById('pumpValLow'),
+      med: document.getElementById('pumpValMed'),
+      high: document.getElementById('pumpValHigh')
+    };
+    let selected = 'low';
+
+    function selectRow(level) {
+      selected = level;
+      rows.forEach(r => r.classList.toggle('selected', r.dataset.level === level));
+    }
+
+    rows.forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.classList.contains('dec-btn') || e.target.classList.contains('add-btn')) return;
+        selectRow(row.dataset.level);
+      });
+    });
+
+    document.querySelectorAll('#pumpEditOverlay .dec-btn, #pumpEditOverlay .add-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const level = btn.dataset.level;
+        selectRow(level);
+        const delta = parseInt(btn.dataset.d, 10);
+        const el = vals[level];
+        let v = parseInt(el.textContent, 10) || 0;
+        v = Math.max(10, Math.min(100, v + delta));
+        el.textContent = v;
+      });
+    });
+  })();
+
+  // Auto checkbox
+  document.getElementById('cbIntervalAuto')?.addEventListener('click', function() {
+    this.classList.toggle('on');
+    this.classList.toggle('off');
+  });
+
+  // Standby / Ready / Treat state machine
+  // Mirrors BaseActivity.updateButtonByStatus + MicrorfActivity.performButtonAction
+  // Real flow: click toggles StandBy <-> Ready; treatment starts automatically.
+  (function initRunButton() {
+    const btn = document.getElementById('btnRun');
+    const msg = document.getElementById('bottomMsg');
+    if (!btn) return;
+
+    let state = 0; // 0 = standby, 1 = ready, 2 = treating
+    let autoTreatTimer = null;
+
+    function setState(s) {
+      state = s;
+      btn.classList.remove('ready', 'treat');
+      clearTimeout(autoTreatTimer);
+
+      if (state === 0) {
+        btn.textContent = 'STANDBY';
+        if (msg) msg.textContent = 'Please Press STANDBY Button';
+      } else if (state === 1) {
+        btn.classList.add('ready');
+        btn.textContent = 'READY';
+        if (msg) msg.textContent = 'System ready';
+        // Simulate automatic transition to treating after 2s
+        autoTreatTimer = setTimeout(() => setState(2), 2000);
+      } else if (state === 2) {
+        btn.classList.add('treat');
+        btn.textContent = 'TREAT';
+        if (msg) msg.textContent = 'System running';
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      if (state === 0) {
+        setState(1); // StandBy -> Ready
+      } else {
+        setState(0); // Ready / Treat -> StandBy
+      }
+    });
+
+    setState(0);
+  })();
+
+  // Expert mode table interactivity
+  // Mirrors MicrorfActivity.setSelected(v) — one box selected at a time
+  // select_v mapping: layer*10 + fieldIndex (0=pwr, 1=time, 2=depth)
+  // When selected, that single box turns green; rest 14 are gray.
+  // Left/right arrows adjust the selected value.
+  function initExpertTable() {
+    const layers = [0, 1, 2, 3, 4];
+    const fields = ['depth', 'power', 'time'];
+    const stepSizes = { depth: 0.1, power: 1, time: 5 };
+    const minValues = { depth: 0.5, power: 0, time: 10 };
+    const maxValues = { depth: 3.5, power: 12, time: 240 };
+    const decimals = { depth: 1, power: 0, time: 0 };
+
+    // State: track numeric values for each box (keys match element IDs)
+    const values = {};
+    layers.forEach(i => {
+      values['depth' + i] = parseFloat(document.getElementById('depth' + i).textContent);
+      values['pwr' + i] = parseInt(document.getElementById('pwr' + i).textContent);
+      values['time' + i] = parseInt(document.getElementById('time' + i).textContent);
+    });
+
+    // Currently selected box (only one at a time)
+    let selectedId = null; // e.g. 'depth0', 'pwr2', 'time4'
+
+    const allValIds = [];
+    layers.forEach(i => {
+      fields.forEach(f => {
+        const key = f === 'depth' ? 'depth' + i : f === 'power' ? 'pwr' + i : 'time' + i;
+        allValIds.push(key);
+      });
+    });
+
+    function updateDisplay() {
+      // Clear all selections (gray)
+      allValIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('selected');
+      });
+      // Set only the selected one green
+      if (selectedId) {
+        const el = document.getElementById(selectedId);
+        if (el) el.classList.add('selected');
+      }
+      // Update text values
+      layers.forEach(i => {
+        document.getElementById('depth' + i).textContent = values['depth' + i].toFixed(decimals.depth);
+        document.getElementById('pwr' + i).textContent = values['pwr' + i];
+        document.getElementById('time' + i).textContent = values['time' + i];
+      });
+      // Update on/off toggle states
+      layers.forEach(i => {
+        const btn = document.getElementById('onoff' + i);
+        if (btn) {
+          btn.classList.toggle('on', onOffState[i]);
+          btn.classList.toggle('off', !onOffState[i]);
+        }
+      });
+      // Update layer count: number of ON layers
+      const activeCount = layers.filter(i => onOffState[i]).length;
+      document.getElementById('layerIndex').textContent = activeCount + ' / 5';
+      // If a depth box is selected, also update the expert depth seekbar
+      if (selectedId && selectedId.startsWith('depth')) {
+        const layer = parseInt(selectedId.replace('depth', ''));
+        const depthVal = values[selectedId];
+        document.getElementById('expertDepthValue').textContent = depthVal.toFixed(1);
+      }
+    }
+
+    function selectBox(id) {
+      selectedId = id;
+      updateDisplay();
+    }
+
+    // Click on each value box to select it
+    allValIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => selectBox(id));
+    });
+
+    // On/off toggle for each layer
+    const onOffState = {};
+    layers.forEach(i => {
+      onOffState[i] = true;
+      const btn = document.getElementById('onoff' + i);
+      if (btn) btn.addEventListener('click', () => {
+        onOffState[i] = !onOffState[i];
+        updateDisplay();
+        showToast('Layer ' + (i + 1) + (onOffState[i] ? ' ON' : ' OFF'));
+      });
+    });
+
+    // Left/right arrows (layerPrev / layerNext) adjust the SELECTED value
+    // In real app, these are < > arrows that adjust the current selected field value
+    document.getElementById('layerPrev')?.addEventListener('click', () => {
+      if (!selectedId) { selectBox('depth0'); return; }
+      const field = selectedId.startsWith('depth') ? 'depth' : selectedId.startsWith('pwr') ? 'power' : 'time';
+      const step = stepSizes[field];
+      const min = minValues[field];
+      const dec = decimals[field];
+      let v = values[selectedId];
+      v = Math.max(min, v - step);
+      if (dec > 0) v = parseFloat(v.toFixed(dec));
+      else v = Math.round(v);
+      values[selectedId] = v;
+      updateDisplay();
+    });
+    document.getElementById('layerNext')?.addEventListener('click', () => {
+      if (!selectedId) { selectBox('depth0'); return; }
+      const field = selectedId.startsWith('depth') ? 'depth' : selectedId.startsWith('pwr') ? 'power' : 'time';
+      const step = stepSizes[field];
+      const max = maxValues[field];
+      const dec = decimals[field];
+      let v = values[selectedId];
+      v = Math.min(max, v + step);
+      if (dec > 0) v = parseFloat(v.toFixed(dec));
+      else v = Math.round(v);
+      values[selectedId] = v;
+      updateDisplay();
+    });
+
+    // Expert depth steppers (- / + buttons adjust selected depth value)
+    document.getElementById('expertDepthReduce')?.addEventListener('click', () => {
+      // If a depth box is selected, adjust that; otherwise default to depth0
+      if (!selectedId || !selectedId.startsWith('depth')) { selectBox('depth0'); }
+      if (selectedId && selectedId.startsWith('depth')) {
+        let v = values[selectedId];
+        v = Math.max(0.5, v - 0.1);
+        v = parseFloat(v.toFixed(1));
+        values[selectedId] = v;
+        updateDisplay();
+      }
+    });
+    document.getElementById('expertDepthAdd')?.addEventListener('click', () => {
+      if (!selectedId || !selectedId.startsWith('depth')) { selectBox('depth0'); }
+      if (selectedId && selectedId.startsWith('depth')) {
+        let v = values[selectedId];
+        v = Math.min(3.5, v + 0.1);
+        v = parseFloat(v.toFixed(1));
+        values[selectedId] = v;
+        updateDisplay();
+      }
+    });
+
+    // Default: no box selected initially (all gray)
+    updateDisplay();
+  }
+  initExpertTable();
+</script>
+</body>
+</html>

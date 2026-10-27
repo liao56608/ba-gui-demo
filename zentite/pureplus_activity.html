@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZenTite — Pure+</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="device-frame">
+  <div class="screen bg-setting">
+    <!-- btn_back -->
+    <a href="index.html" class="btn-back" title="Back"></a>
+    <!-- iv_memory -->
+    <a href="memory_activity.html?src=pureplus" class="btn-memory-icon" title="Memory"></a>
+
+    <!-- Title: logo + "Pure+" centered -->
+    <div class="title-bar">
+      <img src="img/logo_pure_plus.png" alt="" width="55" height="56">
+      <span class="text-cyan-title">Pure+</span>
+    </div>
+
+    <!-- iv_tips (bg_model_2): top=130, left=41 -->
+    <div class="iv-tips-2"></div>
+
+    <!-- Parameter panel (bg_parameter_area): 296x696, top=130, left=423 -->
+    <div class="param-panel">
+      <!-- txt_pluse "Time(min)": top=31 -->
+      <div class="param-label" style="top:31px;">Time(min)</div>
+      <!-- btn_reduce2: top=53, left=37 -->
+      <button class="stepper-btn stepper-reduce" id="timeReduce" style="top:53px;left:37px;"></button>
+      <!-- seekBar_time "30": centered -->
+      <div class="stepper-value" id="timeValue" style="top:53px;left:88px;">30</div>
+      <!-- btn_add2: top=53, right=37 -->
+      <button class="stepper-btn stepper-add" id="timeAdd" style="top:53px;right:37px;"></button>
+
+      <!-- Split line at top=187 -->
+      <div class="split-line" style="top:187px;"></div>
+
+      <!-- txt_temp "Temp(℃)": top=244 -->
+      <div class="param-label" style="top:244px;">Temp(℃)</div>
+      <!-- btn_reduce3: top=266 (244+22), left=37 -->
+      <button class="stepper-btn stepper-reduce" id="tempReduce" style="top:266px;left:37px;"></button>
+      <!-- seekBar_temp "40.0": centered -->
+      <div class="stepper-value" id="tempValue" style="top:266px;left:88px;">40.0</div>
+      <!-- btn_add3: top=266, right=37 -->
+      <button class="stepper-btn stepper-add" id="tempAdd" style="top:266px;right:37px;"></button>
+
+      <!-- Split line at top=400 -->
+      <div class="split-line" style="top:400px;"></div>
+
+      <!-- text_power2: top=457 -->
+      <div class="param-label" style="top:457px;">Power(W)</div>
+      <!-- seekbar_power_view: 223x159, top=487 -->
+      <div class="power-seekbar" id="powerSeekbar" style="top:487px;left:37px;">
+        <span class="value" id="powerValue">0</span>
+        <span class="unit">W</span>
+      </div>
+      <!-- btn_reduce1 (minus): top=589, left=37 -->
+      <button class="stepper-btn stepper-minus" id="powerReduce" style="top:589px;left:37px;"></button>
+      <!-- btn_add1 (plus): top=589, right=37 -->
+      <button class="stepper-btn stepper-plus" id="powerAdd" style="top:589px;right:37px;"></button>
+    </div>
+
+    <!-- Real-time temp (activity_pureplus.xml):
+         icon_temp: line_short at top=680, left=66
+         text_real: 13dp to the right of icon_temp
+         text_temp: treat_platform background, top=15 below icon_temp, text="- -"
+         icon_pure_plus: 20dp to the right of text_temp, bottom aligned with text_temp
+    -->
+    <img src="img/line_short.png" alt="" style="position:absolute;top:680px;left:66px;width:4px;height:19px;">
+    <div class="text-real-temp" style="top:680px;left:83px;line-height:19px;">Real-time</div>
+    <div class="treat-platform" style="top:695px;left:66px;">- -</div>
+    <img src="img/icon_pure_plus.png" alt="" style="position:absolute;top:680px;left:224px;width:156px;height:42px;">
+
+    <!-- Remain time: icon_remain is line_long at top=862, left=66 (same start as icon_temp) -->
+    <div class="icon-remain-line" style="top:862px;left:66px;"></div>
+    <div class="text-remain-label" style="top:857px;left:83px;">Remaining Time</div>
+    <div class="text-remain-value" style="top:882px;left:83px;">00:00</div>
+
+    <!-- Bottom message -->
+    <div class="bottom-msg" id="bottomMsg">Please Press STANDBY Button</div>
+
+    <!-- Standby/Ready/Treat button -->
+    <button class="btn-standby" id="btnRun" style="top:870px;right:52px;">StandBy</button>
+
+    <div class="proto-hint">Demo GUI · <a href="index.html">Home</a></div>
+  </div>
+</div>
+<script src="js/fit.js"></script>
+<script src="js/app.js"></script>
+<script>
+  wireStepper('timeReduce', 'timeAdd', 'timeValue', 1, 60, 1, 30);
+  wireStepper('tempReduce', 'tempAdd', 'tempValue', 30, 50, 0.5, 40.0, 1);
+  wireStepper('powerReduce', 'powerAdd', 'powerValue', 0, 50, 1, 0);
+  document.getElementById('powerSeekbar')?.addEventListener('click', () => {
+    const el = document.getElementById('powerValue');
+    let v = parseInt(el.textContent) || 0;
+    v = Math.min(50, v + 5);
+    el.textContent = v;
+  });
+
+  // Standby / Ready / Treat state machine (same pattern as microrf)
+  (function initRunButton() {
+    const btn = document.getElementById('btnRun');
+    const msg = document.getElementById('bottomMsg');
+    if (!btn) return;
+
+    let state = 0; // 0 = standby, 1 = ready, 2 = treating
+    let autoTreatTimer = null;
+
+    function setState(s) {
+      state = s;
+      btn.classList.remove('ready', 'treat');
+      clearTimeout(autoTreatTimer);
+
+      if (state === 0) {
+        btn.textContent = 'StandBy';
+        if (msg) msg.textContent = 'Please Press STANDBY Button';
+      } else if (state === 1) {
+        btn.classList.add('ready');
+        btn.textContent = 'Ready';
+        if (msg) msg.textContent = 'System ready';
+        autoTreatTimer = setTimeout(() => setState(2), 2000);
+      } else if (state === 2) {
+        btn.classList.add('treat');
+        btn.textContent = 'Treat';
+        if (msg) msg.textContent = 'System running';
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      if (state === 0) setState(1);
+      else setState(0);
+    });
+
+    setState(0);
+  })();
+</script>
+</body>
+</html>

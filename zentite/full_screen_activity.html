@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZenTite — Full Screen Test</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="device-frame">
+  <div id="fsColor" class="fullscreen-color" style="background:#f00;"></div>
+  <div style="position:absolute;top:10px;right:10px;z-index:10;">
+    <button onclick="location.href='set_activity.html'" style="padding:8px 16px;background:rgba(0,0,0,0.5);color:#fff;border:1px solid #fff;border-radius:4px;cursor:pointer;font-size:14px;">Back</button>
+  </div>
+</div>
+<script src="js/fit.js"></script>
+<script>
+  const colors = ['#f00','#0f0','#00f','#fff','#000'];
+  let idx = 0;
+  const el = document.getElementById('fsColor');
+  el.addEventListener('click', () => {
+    idx = (idx + 1) % colors.length;
+    el.style.background = colors[idx];
+  });
+</script>
+</body>
+</html>

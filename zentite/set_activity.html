@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZenTite — Settings</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="device-frame">
+  <div class="screen bg-main">
+    <!-- btn_back: top=25, left=30 -->
+    <a href="index.html" class="btn-back" title="Back"></a>
+
+    <!-- Title: centered -->
+    <div class="title-bar">
+      <span class="text-cyan-title">Setting</span>
+    </div>
+
+    <!-- icon_wifi: top=25, left=694 -->
+    <a href="#" class="icon-wifi" id="wifiBtn" title="Wi-Fi"></a>
+
+    <!-- Settings cards (per activity_set.xml) -->
+    <!-- ll_lang: top=273, left=138 -->
+    <div class="settings-card card-lang" id="cardLang">
+      <span class="label">Language</span>
+    </div>
+    <!-- ll_sound: top=273, left=420 -->
+    <div class="settings-card card-volume" id="cardVolume">
+      <span class="label">Volume</span>
+    </div>
+    <!-- ll_upgrade: top=537, left=138 -->
+    <div class="settings-card card-upgrade" id="cardUpgrade">
+      <span class="label">Upgrade</span>
+    </div>
+    <!-- ll_engineer: top=537, left=420 -->
+    <div class="settings-card card-engineer" id="cardEngineer">
+      <span class="label">Engineer<br>Mode</span>
+    </div>
+
+    <!-- Footer text -->
+    <div class="set-used-time" id="setUsedTime">Used: 0h</div>
+    <div class="set-ver" id="setVer">v1.0.0</div>
+
+    <div class="proto-hint">Demo GUI; actual layout may vary. · <a href="index.html">Home</a></div>
+  </div>
+</div>
+<script src="js/fit.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.getElementById('cardLang')?.addEventListener('click', () => openLangDialog());
+  document.getElementById('cardVolume')?.addEventListener('click', () => openSoundDialog());
+  document.getElementById('cardUpgrade')?.addEventListener('click', () => openVersionDialog());
+  document.getElementById('cardEngineer')?.addEventListener('click', () => {
+    openPswDialog((code) => {
+      if (code.length >= 4) {
+        closeModal();
+        sessionStorage.setItem('engineer_authed', '1');
+        openEngineerMenu();
+        return true;
+      }
+      return false;
+    });
+  });
+  document.getElementById('wifiBtn')?.addEventListener('click', (e) => { e.preventDefault(); showToast('Wi-Fi: Connected'); });
+
+  /* Clear engineer auth when leaving Settings via the back button (to Home).
+     Navigating to an engineer sub-page does NOT clear it — the user is still
+     inside engineer mode and should return to the menu without re-entering
+     the password. */
+  document.querySelector('.btn-back')?.addEventListener('click', () => {
+    sessionStorage.removeItem('engineer_authed');
+  });
+
+  /* If returning from an engineer sub-page, auto-reopen the menu (no password). */
+  if (sessionStorage.getItem('engineer_authed') === '1') {
+    setTimeout(() => openEngineerMenu(), 50);
+  }
+
+  function openEngineerMenu() {
+    const routes = [
+      { label: 'Engineer Setting', href: 'setting_activity.html', desc: 'Not available in this demo GUI' },
+      { label: 'Ageing Test', href: 'ageing_activity.html', desc: 'Not available in this demo GUI' },
+      { label: 'Handpiece Selection', href: 'handler_select_activity.html', desc: '' },
+      { label: 'Authorization', href: 'anti_activity.html', desc: '' },
+      { label: 'Handpiece Info', href: 'burn_activity.html', desc: '' },
+      { label: 'Version / Upgrade', href: 'version_activity.html', desc: '' },
+      { label: 'Wi-Fi diagnostics', href: 'net_debug_activity.html', desc: '' },
+      { label: 'Network Test', href: 'network_test_activity.html', desc: '' },
+      { label: 'Log Viewer', href: 'log_activity.html', desc: '' },
+      { label: 'Display Check', href: 'full_screen_activity.html', desc: '' },
+    ];
+    let body = '<div class="eng-menu-grid">';
+    routes.forEach(r => {
+      body += `<a href="${r.href}" class="eng-menu-item">
+        <div class="eng-menu-item-title">${r.label}</div>
+        <div class="eng-menu-item-desc">${r.desc}</div>
+      </a>`;
+    });
+    body += '</div>';
+    openModal('Engineer Mode', body, { okText: 'Close', onOk: () => {
+      sessionStorage.removeItem('engineer_authed');
+      closeModal();
+    }});
+  }
+</script>
+</body>
+</html>

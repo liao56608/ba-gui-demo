@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZenTite — Splash</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="device-frame">
+  <div class="splash-container">
+    <div class="splash-logo">ZenTite RF System</div>
+    <div class="splash-progress">
+      <div class="splash-progress-bar" id="progressBar"></div>
+    </div>
+    <div style="margin-top:20px;color:#666;font-size:16px;" id="splashText">Loading...</div>
+  </div>
+</div>
+<script src="js/fit.js"></script>
+<script>
+  let progress = 0;
+  const bar = document.getElementById('progressBar');
+  const text = document.getElementById('splashText');
+  const interval = setInterval(() => {
+    progress += 3;
+    bar.style.width = progress + '%';
+    if (progress >= 100) {
+      clearInterval(interval);
+      text.textContent = 'Ready';
+      setTimeout(() => { location.href = 'index.html'; }, 400);
+    }
+  }, 80);
+</script>
+</body>
+</html>
